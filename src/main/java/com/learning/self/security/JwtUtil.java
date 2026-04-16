@@ -11,7 +11,7 @@ import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
-    private final String SECRET="erngkjtrhiu negiunkjtrgkj cnvjeringrejf";
+    private final String SECRET="1234567890qwertyuiopasdfghjklzxcvbnm 23456789qwertyuiosdfghjkzxcvbnm";
     private final long EXPIRATION =1000*60*60;
 
     private Key getSigningKey(){
