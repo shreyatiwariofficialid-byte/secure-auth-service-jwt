@@ -1,28 +1,27 @@
 package com.learning.self.entity;
 
+import java.time.Instant;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
-import lombok.ToString;
+
 
 @Entity
-@Table(name="role")
 @Data
-@ToString(exclude = "user")
-public class Role {
+public class RefreshToken {
+    public static final String RefreshTokenService = null;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long roleId;
-    private boolean basic;
-    private boolean advance;
+    private Long id;
+    private String token;
+    private Instant expiryDate;
 
-    @OneToOne
-    @JoinColumn(name = "userId")
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private Users user;
-    
 }

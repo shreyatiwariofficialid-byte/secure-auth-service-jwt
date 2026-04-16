@@ -1,21 +1,26 @@
 package com.learning.self.service;
 
 import java.time.Instant;
-
+import java.util.Optional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.learning.self.dto.LogInRequest;
+import com.learning.self.dto.LogInResponse;
 import com.learning.self.dto.SignUpRequest;
 import com.learning.self.entity.Users;
+import com.learning.self.entity.BlacklistedToken;
 import com.learning.self.entity.Password;
+import com.learning.self.entity.RefreshToken;
 import com.learning.self.entity.Role;
 import com.learning.self.entity.UserProfile;
+import com.learning.self.repository.BlacklistedTokenReposistory;
 import com.learning.self.repository.PasswordRepository;
 import com.learning.self.repository.RoleRepository;
 import com.learning.self.repository.UserProfileRepository;
 import com.learning.self.repository.UsersRepository;
 import com.learning.self.security.JwtUtil;
+import com.learning.self.service.RefreshTokenService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,8 +34,39 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserProfileRepository userProfileRepository;
+    private final RefreshTokenService  refreshTokenService;
+    private final BlacklistedTokenReposistory blacklistedTokenReposistory;
 
     public String signup(SignUpRequest request){
+
+        if ((request.getEmail() == null || request.getEmail().isBlank()) &&
+        (request.getUsername() == null || request.getUsername().isBlank()) &&
+        (request.getContact() == null || request.getContact().isBlank())) {
+
+            throw new IllegalArgumentException(
+                "At least one of email, username, or contact must be provided"
+            );
+        }
+
+        if ((request.getPassword() == null || request.getPassword().isBlank()) ) {
+
+            throw new IllegalArgumentException(
+                "Password cannot be blank"
+            );
+        }  
+
+        if (request.getEmail() != null && userProfileRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email already registered");
+        }
+
+        if (request.getUsername() != null && userProfileRepository.existsByUsername(request.getUsername())) {
+            throw new RuntimeException("Username already taken");
+        }
+
+        if (request.getContact() != null && userProfileRepository.existsByContact(request.getContact())) {
+            throw new RuntimeException("Contact already registered");
+        }
+
         
         Users user =new Users();
         UserProfile profile=new UserProfile();
@@ -64,17 +100,42 @@ public class AuthService {
     }
 
 
-    public String login(LogInRequest request){
-        UserProfile profile=userProfileRepository.findByEmailOrUsernameOrContact(request.getUserLog(), request.getUserLog(), request.getUserLog()).orElseThrow(()->new RuntimeException("User not found"));
+    public LogInResponse login(LogInRequest request){    
 
-        Long userId=profile.getUser().getUserId();
-
-        Password pass=passwordRepository.findByUser_UserId(userId).orElseThrow(()->new RuntimeException("Password not found"));
-
-        if(passwordEncoder.matches(request.getPassword(),pass.getPassword())){
-            return jwtUtil.generateToken(profile.getUsername());
+        Optional<UserProfile> profile=userProfileRepository.findByEmailOrUsernameOrContact(request.getUserLog(), request.getUserLog(), request.getUserLog());
+        
+        if(profile.isEmpty()){
+            throw new RuntimeException("User not found");
         }
-        throw new RuntimeException("Invalid Password");
+
+        Users user=profile.get().getUser();
+        String storedPassword=user.getPassword().getPassword();
+
+        if(passwordEncoder.matches(request.getPassword(), storedPassword)){
+            String accessGiven="";
+            RefreshToken refreshToken=refreshTokenService.createRefreshToken(user);
+            if(user.getProfile().getUsername() != null && !user.getProfile().getUsername().isEmpty()){
+                accessGiven=user.getProfile().getUsername();
+            }
+            else if(user.getProfile().getEmail() != null && !user.getProfile().getEmail().isEmpty()){
+                accessGiven=user.getProfile().getEmail();
+            }
+            else if(user.getProfile().getContact() != null && !user.getProfile().getContact().isEmpty()){
+                accessGiven=user.getProfile().getContact(); 
+            }
+            String token=jwtUtil.generateToken(accessGiven);
+            // return jwtUtil.generateToken(accessGiven);
+            return new LogInResponse(token,refreshToken.getToken());
+        }
+
+        throw new RuntimeException("Invalid credential");
+
+    }
+
+    public void logout(String token){
+        BlacklistedToken blacklistedToken= new BlacklistedToken();
+        blacklistedToken.setToken(token);
+        blacklistedTokenReposistory.save(blacklistedToken);
     }
     
 }

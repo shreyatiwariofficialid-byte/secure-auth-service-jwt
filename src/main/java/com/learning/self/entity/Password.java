@@ -8,10 +8,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.ToString;
 
 @Entity
 @Table(name = "password")
 @Data
+@ToString(exclude = "users")
 public class Password {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
