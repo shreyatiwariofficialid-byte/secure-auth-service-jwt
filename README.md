@@ -12,11 +12,18 @@ A secure and scalable backend authentication system built using Spring Boot, imp
 🧾 Structured API Responses
 🛡️ Password Encryption using BCrypt
 
+## ❓ Why This Project?
+This project was built to understand and implement real-world authentication and authorization mechanisms used in modern applications.
+It focuses on secure user authentication using JWT, role-based access control, and handling edge cases like secure logout using token blacklisting.
+
+## 🏗️ Architecture Diagram
+![Architecture](docs/architecture.png) 
+
 🛠️ Tech Stack
 Backend: Spring Boot, Spring Security
 Database: MySQL
-ORM: Hibernate (Spring Data JPA)
-Authentication: JWT (JSON Web Token)
+ORM: Hibernate
+Authentication: JWT
 Build Tool: Maven
 Testing Tool: Postman
 
@@ -32,9 +39,11 @@ src/main/java/com/yourpackage
 
 ⚙️ API Endpoints
 Method	Endpoint	Description
-POST	/api/auth/signup	Register a new user
-POST	/api/auth/login	Authenticate user
+POST	/api/self/signup	Register a new user
+POST	/api/self/login 	Authenticate user
 POST	/api/auth/logout	Logout & blacklist token
+GET   /api/self/profile  User profile
+POST   /api/self/refresh-token  Refreshing the session
 
 
 🔄 Authentication Flow
@@ -44,19 +53,43 @@ Token is sent in headers for secured APIs
 On logout, token is blacklisted
 Blacklisted tokens are denied access
 
+## ▶️ How to Run Locally
+### 🔧 Prerequisites
+Make sure you have the following installed:
+- Java 17+
+- Maven
+- MySQL
+---
+### 📥 Clone the Repository
+```bash```
+git clone https://github.com/your-username/secure-auth-service-jwt.git
+cd secure-auth-service-jwt
+
+⚙️ Configure Database
+Create a MySQL database->Update application.properties
+🔐 Configure JWT
+▶️ Run the Application
+
+
+## 🧩 Challenges & Learnings
+- Implemented secure logout using token blacklisting instead of simple token removal  
+- Understood JWT lifecycle, validation, and expiration handling  
+- Designed a clean layered architecture for scalability and maintainability  
+- Handled exceptions globally to ensure consistent API responses  
+- Improved understanding of Spring Security and authentication flows  
+
+
 🚀 Future Enhancements
 📧 Email Verification
-🔄 Password Reset (Forgot Password)
+🔄 Password Reset
 🐳 Docker Support
-☁️ Cloud Deployment (Render / AWS)
+☁️ Cloud Deployment
 📄 Swagger API Documentation
 
 
 👩‍💻 Author
-
 Shreya Tiwari
-
-Backend Developer | Java | Spring Boot
+Java Backend Developer | Java | Spring Boot
 Open to Backend Opportunities
 
 ⭐ Support
