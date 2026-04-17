@@ -17,7 +17,8 @@ This project was built to understand and implement real-world authentication and
 It focuses on secure user authentication using JWT, role-based access control, and handling edge cases like secure logout using token blacklisting.
 
 ## 🏗️ Architecture Diagram
-![Architecture](docs/architecture.png) 
+![Architecture]
+/docs/architecture.png
 
 🛠️ Tech Stack
 Backend: Spring Boot, Spring Security
